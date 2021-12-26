@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-
+from neuralNetwork import NeuralNetwork
 
 
 def press_to_quit(e):
@@ -62,3 +62,44 @@ def train_test_split(data:np.array, test_ratio:float)->tuple:
     test = data[border:]
 
     return train,test
+
+def k_fold(model:NeuralNetwork, X:np.array, y:np.array, k:int)->None:
+    ''' k-fold crossvalidation, creates k groups from data, then trains model k times, always selecting a diferente group as test data'''
+    X = X.copy()
+    y = y.copy()
+
+    data = np.concatenate((X,y.T),axis=1)
+
+    np.random.shuffle(data)
+    folds = np.split(data,k)
+    for i in range(k):
+        print('fold ',i)
+        test = folds[i]
+        train1, train2 = None, None
+        if i > 0:
+            train1 = np.concatenate(folds[:i])
+        if i < k-1:
+            train2 = np.concatenate(folds[i+1:])
+
+        
+        if train1 is None:
+            train = train2
+        elif train2 is None:
+            train = train1
+        else:
+            train = np.concatenate((train1,train2))
+
+        X_train, y_train = train[:,:len(train[0])-1], train[:,-1]
+        X_test, y_test = test[:,:len(test[0])-1], test[:,-1]
+
+        model.fit(X_train,y_train,X_test,y_test)
+        print('train')
+        print(X_train,y_train)
+        print('test')
+        print(X_test,y_test)
+
+X = np.array([[i,i] for i in range(10)])
+y = np.array([[i for i in range(10)]])
+
+model = NeuralNetwork()
+k_fold(model, X, y, 2)
