@@ -71,20 +71,28 @@ def k_fold(model:NeuralNetwork, X:np.array, y:np.array, k:int)->None:
     data = np.concatenate((X,y.T),axis=1)
 
     np.random.shuffle(data)
-    folds = np.split(data,k)
+    if len(data)%k == 0:
+        folds = np.split(data,k)
+    else:
+        # if cannot equaly distribute data then 
+        leftover = data[:len(data)%k] 
+        data = data[len(data)%k:] # remove rows so the rest is divisible by k
+        folds = np.split(data,k) 
+        for i in range(len(leftover)): # add one row to every fold from leftover
+            folds[i] = np.concatenate((folds[i],leftover[i].reshape((1,len(leftover[i])))))
+
     for i in range(k):
-        print('fold ',i)
         test = folds[i]
         train1, train2 = None, None
-        if i > 0:
-            train1 = np.concatenate(folds[:i])
-        if i < k-1:
-            train2 = np.concatenate(folds[i+1:])
+        if i > 0: # if not first fold
+            train1 = np.concatenate(folds[:i]) # select folds before test
+        if i < k-1: # if not last fold
+            train2 = np.concatenate(folds[i+1:]) # select folds after test
 
         
-        if train1 is None:
+        if train1 is None: # if test is first fold
             train = train2
-        elif train2 is None:
+        elif train2 is None: # if test is last fold
             train = train1
         else:
             train = np.concatenate((train1,train2))
@@ -93,13 +101,3 @@ def k_fold(model:NeuralNetwork, X:np.array, y:np.array, k:int)->None:
         X_test, y_test = test[:,:len(test[0])-1], test[:,-1]
 
         model.fit(X_train,y_train,X_test,y_test)
-        print('train')
-        print(X_train,y_train)
-        print('test')
-        print(X_test,y_test)
-
-X = np.array([[i,i] for i in range(10)])
-y = np.array([[i for i in range(10)]])
-
-model = NeuralNetwork()
-k_fold(model, X, y, 2)
