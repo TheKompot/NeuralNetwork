@@ -49,3 +49,16 @@ def show_data(X, y, predicted=None, s=30, block=True):
     plt.tight_layout()
     
     plt.show(block=block)
+
+
+def train_test_split(data:np.array, test_ratio:float)->tuple:
+    '''
+    function for splitting data randomly in to two groups in ratio 1-test_ratio : test_ratio
+    '''
+    data = data.copy()
+    np.random.shuffle(data)
+    border = len(data) - round(len(data)*test_ratio)
+    train = data[:border]
+    test = data[border:]
+
+    return train,test
