@@ -2,7 +2,7 @@ import numpy as np
 
 class NeuralNetwork:
 
-    def __init__(self, num_layers:int, num_perceptrons:list, alpha = 0.1):
+    def __init__(self, num_layers:int, num_perceptrons:list, alpha:float = 0.1):
         self.W_list = []
         self.num_layers = num_layers
         self.num_n = num_perceptrons
@@ -18,8 +18,17 @@ class NeuralNetwork:
                 w = np.random.rand(self.num_n[i],self.num_n[i+1])
             self.W_list.append(w)
 
-    def _add_bias(self,x):
+    def _add_bias(self,x:np.array)->np.array:
+        '''add 1 at the end of vector x'''
         return np.concatenate((x,[1]))
+
+    def sigmoid(self, x:float)->float:
+        '''Activation function - logistical sigmoid'''
+        return 1/(1 + np.exp(-x))
+    
+    def relu(self,x:float)->float:
+        '''Activation function - Rectified Linear Unit'''
+        return max([0,x])
 
     def fit(self, X_train, y_train, X_test, y_test, num_epochs=10):
         pass
