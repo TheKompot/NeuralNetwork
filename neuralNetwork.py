@@ -12,14 +12,21 @@ class NeuralNetwork:
     def _create_weights(self):
         '''random initialization of weights WITHOUT BIAS'''
         for i in range(self.num_layers-1):
-            w = np.random.rand(self.num_n[i],self.num_n[i+1])
+            if i == 0: # for weights between input and first hidden layer -> add 1 plus row (bias)
+                w = np.random.rand(self.num_n[i]+1,self.num_n[i+1])
+            else:
+                w = np.random.rand(self.num_n[i],self.num_n[i+1])
             self.W_list.append(w)
+
+    def _add_bias(self,x):
+        return np.concatenate((x,[1]))
 
     def fit(self, X_train, y_train, X_test, y_test, num_epochs=10):
         pass
 
     def predict(self,X:np.array)->np.array:
         '''for given input return prediction WITHOUT ACTIVATAION FUNCTION'''
+        X = np.array([ self._add_bias(x) for x in X])
         for i in range(self.num_layers-1):
             X = np.dot(X,self.W_list[i])
         return X
