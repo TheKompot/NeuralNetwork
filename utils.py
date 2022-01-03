@@ -100,4 +100,5 @@ def k_fold(model:NeuralNetwork, X:np.array, y:np.array, k:int)->None:
         X_train, y_train = train[:,:len(train[0])-1], train[:,-1]
         X_test, y_test = test[:,:len(test[0])-1], test[:,-1]
 
-        model.fit(X_train,y_train,X_test,y_test)
+        train_eror,train_accuracy = model.fit(X_train,y_train)
+        #test_eror,test_accuracy
