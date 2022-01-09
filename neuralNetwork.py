@@ -150,18 +150,20 @@ class NeuralNetwork:
     
     def evaluate(self,file_path:str)->float:
         ''' imports data from file_path, calculates prediction and returns mean error'''
-        data = np.load(file_path)   # load data
+        data = np.loadtxt(file_path)   # load data
         X = data[:,:2]              # split input and output
         y = data[:,2]
 
         predicted = self.predict(X) # calculate prediction
         err = self.calculate_error(predicted, y) # calculate mean error
         return err
+
     def save_weights(self,file_path:str)->None:
         '''exports weight to file_path'''
-        with open(file_path) as f:
+        with open(file_path,'wb') as f:
             for array in self.W_list:
                 np.save(f,array)
+
     def load_weights(self,file_path:str)->None:
         '''imports weights from file
         Raises:
@@ -169,7 +171,7 @@ class NeuralNetwork:
         AttributeError
             if numpy matrices in file have differente dimension then in the model
         '''
-        with open(file_path) as f:
+        with open(file_path,'rb') as f:
             for i in range(self.num_layers-1):
                 w = np.load(f)
                 if w.shape == self.W_list[i].shape:
