@@ -157,3 +157,22 @@ class NeuralNetwork:
         predicted = self.predict(X) # calculate prediction
         err = self.calculate_error(predicted, y) # calculate mean error
         return err
+    def save_weights(self,file_path:str)->None:
+        '''exports weight to file_path'''
+        with open(file_path) as f:
+            for array in self.W_list:
+                np.save(f,array)
+    def load_weights(self,file_path:str)->None:
+        '''imports weights from file
+        Raises:
+        ------
+        AttributeError
+            if numpy matrices in file have differente dimension then in the model
+        '''
+        with open(file_path) as f:
+            for i in range(self.num_layers-1):
+                w = np.load(f)
+                if w.shape == self.W_list[i].shape:
+                    self.W_list[i] = w
+                else:
+                    raise AttributeError('Dimension of weight matrix does not match')
