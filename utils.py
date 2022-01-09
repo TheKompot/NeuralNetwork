@@ -16,9 +16,9 @@ def show_history(history, block=True):
     fig.canvas.mpl_connect('key_press_event', press_to_quit)
 
     plt.title('Loss per epoch')
-    plt.plot(history.history['loss'], '-b', label='training loss')
+    plt.plot(history['loss'], '-b', label='training loss')
     try:
-        plt.plot(history.history['val_loss'], '-r', label='validation loss')
+        plt.plot(history['val_loss'], '-r', label='validation loss')
     except KeyError:
         pass
     plt.grid(True)
@@ -100,5 +100,5 @@ def k_fold(model:NeuralNetwork, X:np.array, y:np.array, k:int)->None:
         X_train, y_train = train[:,:len(train[0])-1], train[:,-1]
         X_test, y_test = test[:,:len(test[0])-1], test[:,-1]
 
-        train_eror,train_accuracy = model.fit(X_train,y_train)
-        #test_eror,test_accuracy
+        train_eror.extend( model.fit(X_train,y_train))
+        #test_eror.extend(model.)
