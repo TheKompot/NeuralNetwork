@@ -112,7 +112,8 @@ class NeuralNetwork:
     def predict(self,X:np.array)->np.array:
         '''for given input return prediction'''
         X = np.array([ self._add_bias(x) for x in X])
-        for i in range(self.num_layers-1):
+        for i in range(self.num_layers-2):
             X = np.dot(X,self.W_list[i])
             X = np.array([self.fun(row) for row in X]) # applying activation function
+        X = np.dot(X,self.W_list[-1])
         return X.reshape(X.shape[0])
