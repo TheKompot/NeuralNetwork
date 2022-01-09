@@ -66,11 +66,7 @@ class NeuralNetwork:
                 AttributeError: if x is 0'''
         if isinstance(x, np.ndarray):
             return np.array([self.relu_derivation(i) for i in x])
-        if x > 0:
-            return x
-        if x < 0:
-            return 0
-        raise AttributeError('for 0 derivation of relu is not defined')
+        return max(0,x)
 
     def calculate_error(self,predicted:np.array,real:np.array)->float:
         '''method for calculating error'''
