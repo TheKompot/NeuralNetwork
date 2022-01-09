@@ -2,8 +2,7 @@ import numpy as np
 
 class NeuralNetwork:
 
-    def __init__(self, num_perceptrons:list,activation:str):
-        num_layers = 3
+    def __init__(self,num_layers:int, num_perceptrons:list,activation:str):
         if num_layers != len(num_perceptrons):
             raise AttributeError('Number of layers and perceptron list size does not match')
         self.W_list = []
@@ -81,23 +80,24 @@ class NeuralNetwork:
 
             for per in np.random.permutation(X_train.shape[0]):
                 x = self._add_bias(X_train[per,:]) 
+                h=[x]
 
-                net = [0,0]
+                net = []
+                for i in range(self.num_layers-2):
+                    net.append(np.dot(h[-1],self.W_list[i]))
+                    h.append(self.fun(net[-1]))
+                net.append(np.dot(h[-1],self.W_list[-1]))
 
-                net[0] = np.dot(x,self.W_list[0])
-                h  = self.fun(net[0])
-
-                net[1] = np.dot(h,self.W_list[1])
-                y = net[1][0] # from array to numbers
-
+                y = net[-1][0]
                 d = y_train[per]
                 
-                deltas =  [0,0]
-                deltas[1] = np.array([d-y])
-                deltas[0] = self.W_list[1].T * deltas[1] * self.der_fun(net[0])   
+                deltas = [0 for _ in range(self.num_layers-1)]
+                deltas[-1] = np.array([d-y])
+                for i in range(self.num_layers-3,-1,-1):
+                    deltas[i] = self.W_list[i+1].T * deltas[i+1] * self.der_fun(net[i])
 
-                self.W_list[0] += (alpha * np.outer(x,deltas[0]))
-                self.W_list[1] += (alpha * np.outer(h,deltas[1]))
+                for i in range(self.num_layers-1):
+                    self.W_list[i] += (alpha * np.outer(h[i], deltas[i]))
 
             predicted = self.predict(X_train)
             E = self.calculate_error(predicted, y_train)
