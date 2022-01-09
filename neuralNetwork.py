@@ -94,7 +94,7 @@ class NeuralNetwork:
                 deltas = [0 for _ in range(self.num_layers-1)]
                 deltas[-1] = np.array([d-y])
                 for i in range(self.num_layers-3,-1,-1):
-                    deltas[i] = self.W_list[i+1].T * deltas[i+1] * self.der_fun(net[i])
+                    deltas[i] = np.dot(self.W_list[i+1] , deltas[i+1].T) * self.der_fun(net[i])
 
                 for i in range(self.num_layers-1):
                     self.W_list[i] += (alpha * np.outer(h[i], deltas[i]))
