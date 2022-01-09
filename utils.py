@@ -63,12 +63,14 @@ def train_test_split(data:np.array, test_ratio:float)->tuple:
 
     return train,test
 
-def k_fold(model:NeuralNetwork, X:np.array, y:np.array, k:int)->None:
+def k_fold(model:NeuralNetwork, X:np.array, y:np.array, k:int)->tuple:
     ''' k-fold crossvalidation, creates k groups from data, then trains model k times, always selecting a diferente group as test data'''
     X = X.copy()
     y = y.copy()
 
     data = np.concatenate((X,y.T),axis=1)
+
+    train_err,test_err = [],[]
 
     np.random.shuffle(data)
     if len(data)%k == 0:
@@ -100,5 +102,7 @@ def k_fold(model:NeuralNetwork, X:np.array, y:np.array, k:int)->None:
         X_train, y_train = train[:,:len(train[0])-1], train[:,-1]
         X_test, y_test = test[:,:len(test[0])-1], test[:,-1]
 
-        train_eror.extend( model.fit(X_train,y_train))
-        #test_eror.extend(model.)
+        train_temp,test_temp =  model.fit(X_train,y_train,X_test,y_test,300,alpha=0.03)
+        train_err.extend(train_temp)
+        test_err.extend(test_temp)
+    return train_err,test_err
