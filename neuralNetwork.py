@@ -2,13 +2,13 @@ import numpy as np
 
 class NeuralNetwork:
 
-    def __init__(self, num_layers:int, num_perceptrons:list, alpha:float = 0.1):
+    def __init__(self, num_perceptrons:list):
+        num_layers = 3
         if num_layers != len(num_perceptrons):
             raise AttributeError('Number of layers and perceptron list size does not match')
         self.W_list = []
         self.num_layers = num_layers
         self.num_n = num_perceptrons
-        self.alpha = alpha
         self._create_weights()
         
     def _create_weights(self):
@@ -18,11 +18,21 @@ class NeuralNetwork:
                 w = np.random.rand(self.num_n[i]+1,self.num_n[i+1])
             else:
                 w = np.random.rand(self.num_n[i],self.num_n[i+1])
+            w = np.array([i*0.6-0.3 for i in w]) # changing the range to [-0.3,0.3]
             self.W_list.append(w)
 
     def _add_bias(self,x:np.array)->np.array:
         '''add 1 at the end of vector x'''
         return np.concatenate((x,[1]))
+
+    def tanh(self,x:np.array)->np.array:
+        '''Activation function - hyperbolic tangens'''
+        return np.tanh(x)
+
+    def tanh_derivation(self,x:float or np.array)->float or np.array:
+        if isinstance(x, np.ndarray):
+            return np.array([self.tanh_derivation(i) for i in x])
+        return 1-x**2
 
     def sigmoid(self, x:float or np.array)->float or np.array:
         '''Activation function - logistical sigmoid'''
@@ -51,12 +61,12 @@ class NeuralNetwork:
 
     def calculate_error(self,predicted:float,real:float)->float:
         '''method for calculating error'''
-        return ((predicted-real)**2)/2
+        return ((real-predicted)**2)/2
 
     def calculate_accuracy(self, inputs, targets):
         pass
 
-    def fit(self, X_train, y_train, num_epochs=10):
+    def fit(self, X_train, y_train, num_epochs=10, alpha:float = 0.1):
         
         error_history = []
         accuracy_history = []
@@ -67,32 +77,24 @@ class NeuralNetwork:
             for per in np.random.permutation(X_train.shape[0]):
                 x = self._add_bias(X_train[per,:]) 
 
-                net = [x] # outputs of the network without activation function
-                deltas = [] # computed errors of neurons
-                inputs = [x]
+                net = [0,0]
 
-                for i in range(self.num_layers-1):              # calculating output from NN
-                    x = np.dot(x,self.W_list[i])                # multiplying with weights
-                    net.append(x)                         # storing output for error calculation
-                    x = np.array([self.sigmoid(row) for row in x]) # applying activation function
-                    inputs.append(x)
+                net[0] = np.dot(x,self.W_list[0])
+                h  = self.sigmoid(net[0])
 
-                y = y_train[per]
-                E += self.calculate_error(x[0],y)
+                net[1] = np.dot(h,self.W_list[1])
+                y = net[1][0] # from array to numbers
 
-                for i in range(self.num_layers-1,-1,-1): # computing derivation of error for every layer
-                    if i == self.num_layers-1: #if output layer
-                        d = (x-y) * net[-1]
-                    elif i == 0:                        # if input layer
-                        d = np.dot(self.W_list[i],deltas[-1]) 
-                    else:
-                        d = np.dot(self.W_list[i],deltas[-1]) * self.sigmoid_derivation(net[-1])
+                d = y_train[per]
+                E += self.calculate_error(predicted=y,real=d)
+                
+                deltas =  [0,0]
+                deltas[1] = np.array([d-y])
+                deltas[0] = self.W_list[1].T * deltas[1] * self.sigmoid_derivation(net[0])   
 
-                    deltas.append(d)
-                    net.pop()
-                deltas.reverse()
-                for i in range(self.num_layers-1): # updating weights
-                    self.W_list[i] += (self.alpha * np.dot( deltas[i] ,inputs[i]))
+                self.W_list[0] += (alpha * np.outer(x,deltas[0]))
+                self.W_list[1] += (alpha * np.outer(h,deltas[1]))
+
             error_history.append(E/X_train.shape[0])
             #acc = self.compute_accuracy(inputs, targets)
             #accuracy_history.append(acc)
@@ -107,4 +109,3 @@ class NeuralNetwork:
             X = np.dot(X,self.W_list[i])
             X = np.array([self.sigmoid(row) for row in X]) # applying activation function
         return X
-
